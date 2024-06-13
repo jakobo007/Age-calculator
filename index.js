@@ -10,62 +10,83 @@ document.addEventListener('DOMContentLoaded', () => {
   const outputDay = document.getElementById('DD');
   const outputMonth = document.getElementById('MM');
   const outputYear = document.getElementById('YY');
+  const submitBtn = document.querySelector('.submit_btn');
+
+  let clickCount = 0;
+  let clickTimeout;
 
   form.addEventListener('submit', (event) => {
     event.preventDefault();
-    let isValid = true;
-    
-    // Clear all error messages and reset styles
-    validErrors.forEach(error => error.style.display = 'none');
-    dayError.style.display = 'none';
-    monthError.style.display = 'none';
-    yearError.style.display = 'none';
-    resetInputStyles();
+    clickCount++;
 
-    // Validate day input
-    const day = parseInt(dayInput.value);
-    if (isNaN(day) || dayInput.value.trim() === '') {
-      showError(dayInput, 'valid_error');
-      isValid = false;
-    } else if (day < 1 || day > 31) {
-      showError(dayInput, 'day_error');
-      isValid = false;
-    }
+    if (clickCount === 1) {
+      // Single click logic
+      let isValid = true;
 
-    // Validate month input
-    const month = parseInt(monthInput.value);
-    if (isNaN(month) || monthInput.value.trim() === '') {
-      showError(monthInput, 'valid_error');
-      isValid = false;
-    } else if (month < 1 || month > 12) {
-      showError(monthInput, 'month_error');
-      isValid = false;
-    }
+      // Clear all error messages and reset styles
+      validErrors.forEach(error => error.style.display = 'none');
+      dayError.style.display = 'none';
+      monthError.style.display = 'none';
+      yearError.style.display = 'none';
+      resetInputStyles();
 
-    // Validate year input
-    const year = parseInt(yearInput.value);
-    const currentYear = new Date().getFullYear();
-    if (isNaN(year) || yearInput.value.trim() === '') {
-      showError(yearInput, 'valid_error');
-      isValid = false;
-    } else if (year > currentYear) {
-      showError(yearInput, 'year_error');
-      isValid = false;
-    }
+      // Validate day input
+      const day = parseInt(dayInput.value);
+      if (isNaN(day) || dayInput.value.trim() === '') {
+        showError(dayInput, 'valid_error');
+        isValid = false;
+      } else if (day < 1 || day > 31) {
+        showError(dayInput, 'day_error');
+        isValid = false;
+      }
 
-    // Calculate and display age if all inputs are valid
-    if (isValid) {
-      calculateAndDisplayAge(day, month, year);
+      // Validate month input
+      const month = parseInt(monthInput.value);
+      if (isNaN(month) || monthInput.value.trim() === '') {
+        showError(monthInput, 'valid_error');
+        isValid = false;
+      } else if (month < 1 || month > 12) {
+        showError(monthInput, 'month_error');
+        isValid = false;
+      }
+
+      // Validate year input
+      const year = parseInt(yearInput.value);
+      const currentYear = new Date().getFullYear();
+      if (isNaN(year) || yearInput.value.trim() === '') {
+        showError(yearInput, 'valid_error');
+        isValid = false;
+      } else if (year > currentYear) {
+        showError(yearInput, 'year_error');
+        isValid = false;
+      }
+
+      // Calculate and display age if all inputs are valid
+      if (isValid) {
+        calculateAndDisplayAge(day, month, year);
+      }
+
+      // Set timeout to reset click count after 1 second
+      clickTimeout = setTimeout(() => {
+        clickCount = 0;
+      }, 1000);
+
+    } else if (clickCount === 2) {
+      // Double click logic
+      resetForm();
+      clearTimeout(clickTimeout); // Clear the timeout as form is already reset
+      clickCount = 0; // Reset click count
     }
   });
 
   function showError(input, errorType) {
-    input.nextElementSibling.style.display = 'block';
-    input.style.borderColor = 'var(--Light-red)';
-    input.previousElementSibling.style.color = 'var(--Light-red)';
-    if (errorType !== 'valid_error') {
+    if (input.value.trim() === '') {
+      input.nextElementSibling.style.display = 'block'; // valid_error
+    } else {
       document.getElementById(errorType).style.display = 'block';
     }
+    input.style.borderColor = 'red';
+    input.previousElementSibling.style.color = 'red';
   }
 
   function resetInputStyles() {
@@ -96,5 +117,17 @@ document.addEventListener('DOMContentLoaded', () => {
     outputDay.textContent = ageDays.toString().padStart(2, '0');
     outputMonth.textContent = ageMonths.toString().padStart(2, '0');
     outputYear.textContent = ageYears;
+  }
+
+  function resetForm() {
+    form.reset();
+    resetInputStyles();
+    validErrors.forEach(error => error.style.display = 'none');
+    dayError.style.display = 'none';
+    monthError.style.display = 'none';
+    yearError.style.display = 'none';
+    outputDay.textContent = '--';
+    outputMonth.textContent = '--';
+    outputYear.textContent = '--';
   }
 });
